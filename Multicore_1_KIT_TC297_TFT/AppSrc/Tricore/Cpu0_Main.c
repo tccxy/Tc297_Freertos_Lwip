@@ -43,7 +43,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "hDrv.h"
-#include "gtm.h"
 #include "semphr.h"
 
 IfxCpu_syncEvent g_cpuSyncEvent = 0;
