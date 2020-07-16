@@ -340,6 +340,26 @@
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/FreeRtos/portable/GCC/TriCore&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/AppSrc/Tricore&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Lwip/AURIX&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Lwip/port/include/arch&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Lwip/port/netif/DWC_ether&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Lwip/src/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Lwip/src/include/lwip&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Lwip/src/include/netif&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Lwip/src/include/posix&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Lwip/src/include/lwip/apps&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Lwip/src/include/lwip/priv&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Lwip/src/include/lwip/prot&quot;"/>
                                     								
                                 </option>
                                 								
@@ -757,6 +777,20 @@
         	
     </storageModule>
     	
-    <storageModule moduleId="refreshScope"/>
+    <storageModule moduleId="refreshScope" versionNumber="2">
+        		
+        <configuration configurationName="Debug">
+            			
+            <resource resourceType="PROJECT" workspacePath="/Multicore_1_KIT_TC297_TFT"/>
+            		
+        </configuration>
+        		
+        <configuration configurationName="Release">
+            			
+            <resource resourceType="PROJECT" workspacePath="/Multicore_1_KIT_TC297_TFT"/>
+            		
+        </configuration>
+        	
+    </storageModule>
     
 </cproject>

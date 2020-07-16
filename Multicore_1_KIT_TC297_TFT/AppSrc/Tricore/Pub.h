@@ -8,15 +8,29 @@
 #include "IfxMultican.h"
 #include "string.h"
 
-void init_led(void);
-void led_107_on(void);
-void led_107_off(void);
-void led_107_blink(void);
-void led_108_on(void);
-void led_108_off(void);
-void led_108_blink(void);
-void led_109_on(void);
-void led_109_off(void);
-void led_109_blink(void);
+#include "Ifx_Types.h"
+#include "IfxCpu.h"
+#include "IfxScuWdt.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "hDrv.h"
+#include "semphr.h"
 
+#include <netif.h>
+#include <tcpip.h>
+#include <etharp.h>
+#include <ethernet.h>
+#include <ethernetif.h>
+#include "lwip/opt.h"
+#include "lwip/mem.h"
+#include "lwip/memp.h"
+#include "netif/etharp.h"
+#include "lwip/dhcp.h"
+#include "lwip/netif.h"
+#include "lwip/timeouts.h"
+#include "sockets.h"
+#include "udp.h"
+#include "ip4_addr.h"
+
+extern SemaphoreHandle_t g_eth_swamphore;
 #endif
