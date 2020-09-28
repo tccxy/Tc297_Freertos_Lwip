@@ -341,6 +341,10 @@
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/AppSrc/Tricore&quot;"/>
                                     									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/AppSrc/Power&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/AppSrc/Qspi&quot;"/>
+                                    									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Lwip/AURIX&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Lwip/port/include/arch&quot;"/>

@@ -455,15 +455,27 @@ void ethernetif_input(struct netif *netif)
 
 static void ethernetif_link_callback(struct netif *netif)
 {
-  Ifx_print("ethernetif_link_callback in \r\n");
+  static int link_flag = 0;
+  
   if (IfxEth_isLinkActive(&g_drv_eth.eth))
   {
-
-    netif_set_up(netif);
+    if (link_flag == 0)
+    {
+      Ifx_print("ethernetif_link_callback will set up netif %p\r\n", netif);
+      netif_set_up(netif);
+      netif_set_link_up(netif);
+    }
+    link_flag = 1;
   }
   else
   {
-    netif_set_down(netif);
+    if (link_flag == 1)
+    {
+      Ifx_print("ethernetif_link_callback will set down netif %p\r\n", netif);
+      netif_set_down(netif);
+      netif_set_link_down(netif);
+    }
+    link_flag = 0;
   }
 }
 
@@ -498,7 +510,7 @@ err_t ethernetif_init(struct netif *netif)
 
   netif->output = etharp_output;
   netif->linkoutput = low_level_output;
-
+  netif->link_callback = ethernetif_link_callback;
   /* initialize the hardware */
   low_level_init(netif);
 
@@ -522,7 +534,7 @@ err_t ethernetif_init(struct netif *netif)
   /*  Registers the default network interface.*/
   netif_set_default(netif);
 
-  netif_set_link_up(netif);
+  //netif_set_link_up(netif);
 
   return ERR_OK;
 }

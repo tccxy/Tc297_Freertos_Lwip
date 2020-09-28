@@ -39,11 +39,12 @@
  *********************************************************************************************************************/
 
 #include "Pub.h"
+#include "TLF35584Demo.h"
 
 IfxCpu_syncEvent g_cpuSyncEvent = 0;
 
 #define UDP_SERVER_PORT 8080
-int ddddd_flag = 0;
+
 static struct netif xnetif =
     {
         /* set MAC hardware address length */
@@ -57,6 +58,15 @@ static struct netif xnetif =
 };
 
 #define ISR_PRIORITY_ETH_IRQ 3
+
+void eth_link_monitor(void *pvParameters)
+{
+    while (1)
+    {
+        vTaskDelay(1000);
+        xnetif.link_callback(&xnetif);
+    }
+}
 
 static void net_init(void)
 {
@@ -73,7 +83,9 @@ static void net_init(void)
     netif_add(&xnetif, &ipaddr, &netmask, &gw, (void *)0, &ethernetif_init, ethernet_input);
 
     /*如果不能确定eth的link状态，这里可以加一个任务监控eth的link状态*/
-    netif_set_up(&xnetif);
+    Ifx_print("eth_link_monitor will run %p \r\n", &xnetif);
+    //优先级小于 接收的任务，每隔1s监控一次
+    xTaskCreate(eth_link_monitor, "eth_link_monitor", 1024, NULL, 4, NULL);
     Ifx_print("net_init down \r\n");
 }
 
@@ -91,8 +103,18 @@ static void net_init_socket(void)
     tcpip_init(NULL, NULL);
     netif_add(&xnetif, &ipaddr, &netmask, &gw, (void *)0, &ethernetif_init, tcpip_input);
 
-    netif_set_up(&xnetif);
+    //netif_set_up(&xnetif);
+    Ifx_print("eth_link_monitor will run %p \r\n", &xnetif);
+    //优先级小于 接收的任务，每隔1s监控一次
+    xTaskCreate(eth_link_monitor, "eth_link_monitor", 1024, NULL, 4, NULL);
     Ifx_print("net_init_socket down \r\n");
+}
+
+void eth_init(void *pvParameters)
+{
+    //net_init();//when test_eth use this
+    net_init_socket(); // when test_eth_socket* use this
+    ethernetif_recv(&xnetif);
 }
 
 IFX_INTERRUPT(ETH_IRQHandler, 0, ISR_PRIORITY_ETH_IRQ);
@@ -115,7 +137,6 @@ void ETH_IRQHandler(void)
     }
     if (IfxEth_isTuInterrupt(&g_drv_eth.eth))
     {
-        //led_109_on();
         IfxEth_clearTuInterrupt(&g_drv_eth.eth);
     }
     IfxSrc_clearRequest(&SRC_ETH_ETH0_SR);
@@ -130,13 +151,6 @@ void recv_callback(void *arg, struct udp_pcb *upcb, struct pbuf *pkt_buf,
     memcpy(data, pkt_buf->payload, pkt_buf->len);
     Ifx_print("data is %s \r\n", data);
     pbuf_free(pkt_buf);
-}
-
-void eth_init(void *pvParameters)
-{
-    //net_init();//when test_eth use this
-    net_init_socket();// when test_eth_socket* use this
-    ethernetif_recv(&xnetif);
 }
 
 void test_eth(void *pvParameters)
@@ -247,9 +261,11 @@ int core0_main(void)
     /* !!WATCHDOG0 AND SAFETY WATCHDOG ARE DISABLED HERE!!
      * Enable the watchdogs and service them periodically if it is required
      */
+
     IfxScuWdt_disableCpuWatchdog(IfxScuWdt_getCpuWatchdogPassword());
     IfxScuWdt_disableSafetyWatchdog(IfxScuWdt_getSafetyWatchdogPassword());
 
+    //TLF35584Demo_Init();
     /* Initialize the LED and the time constants before the CPUs synchronization */
     init_led();
     initTime();
@@ -265,7 +281,7 @@ int core0_main(void)
     //xTaskCreate(test_eth_socket_server, "test_eth_socket_server", 1024, NULL, 3, NULL);
 
     /*eth Must be at the highest level of the running task*/
-    xTaskCreate(eth_init, "eth_init", 1024, NULL, 4, NULL);
+    xTaskCreate(eth_init, "eth_init", 1024, NULL, 5, NULL);
 
     // Start the scheduler
     vTaskStartScheduler();

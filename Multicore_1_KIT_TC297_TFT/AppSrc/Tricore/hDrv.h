@@ -95,7 +95,7 @@ struct drv_multi_can
 IFX_EXTERN struct drv_eth g_drv_eth;
 IFX_EXTERN struct drv_asc_lin_uart g_drv_asc_lin_uart;
 //IFX_EXTERN SemaphoreHandle_t s_xSemaphore;
-IFX_EXTERN int ddddd_flag;
+
 void init_uart_module(void);
 void Ifx_print(pchar format, ...);
 
