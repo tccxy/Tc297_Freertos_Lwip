@@ -46,6 +46,10 @@
 #include "Ifx_Assert.h"
 #include "IfxStdIf_DPipe.h"
 #include "_Utilities/Ifx_Assert.h"
+#include "IfxCpu_Intrinsics.h"
+#include "IfxPort.h"
+#include "IfxQspi_SpiMaster.h"
+#include "IfxStm.h"
 #include "Assert.h"
 
 /******************************************************************************/

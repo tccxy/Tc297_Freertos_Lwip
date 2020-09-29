@@ -9,8 +9,6 @@
 #include "string.h"
 
 #include "Ifx_Types.h"
-#include "IfxCpu.h"
-#include "IfxScuWdt.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "hDrv.h"

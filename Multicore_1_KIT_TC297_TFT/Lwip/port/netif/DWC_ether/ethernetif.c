@@ -456,8 +456,10 @@ void ethernetif_input(struct netif *netif)
 static void ethernetif_link_callback(struct netif *netif)
 {
   static int link_flag = 0;
-  
-  if (IfxEth_isLinkActive(&g_drv_eth.eth))
+  int link_state = 0;
+
+  link_state = IfxEth_isLinkActive(&g_drv_eth.eth);
+  if (link_state)
   {
     if (link_flag == 0)
     {

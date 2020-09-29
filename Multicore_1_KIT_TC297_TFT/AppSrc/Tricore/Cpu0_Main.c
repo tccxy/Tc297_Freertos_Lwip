@@ -39,7 +39,7 @@
  *********************************************************************************************************************/
 
 #include "Pub.h"
-#include "TLF35584Demo.h"
+#include "TLF35584.h"
 
 IfxCpu_syncEvent g_cpuSyncEvent = 0;
 
@@ -202,7 +202,6 @@ void test_eth_socket_client(void *pvParameters)
     struct sockaddr_in address;
     char data_test[10] = {1};
     int i = 0;
-    err_t err;
 
     memset(&address, 0, sizeof(address));
     address.sin_family = AF_INET;
@@ -214,7 +213,7 @@ void test_eth_socket_client(void *pvParameters)
 
     for (;;)
     {
-        Ifx_print("send -- %d- msg \r\n", i++);
+        Ifx_print("send -- %d--msg \r\n", i++);
         sendto(socket_descriptor, data_test, sizeof(data_test), 0, (struct sockaddr *)&address, sizeof(address));
         vTaskDelay(1000);
     }
@@ -265,11 +264,13 @@ int core0_main(void)
     IfxScuWdt_disableCpuWatchdog(IfxScuWdt_getCpuWatchdogPassword());
     IfxScuWdt_disableSafetyWatchdog(IfxScuWdt_getSafetyWatchdogPassword());
 
-    //TLF35584Demo_Init();
     /* Initialize the LED and the time constants before the CPUs synchronization */
     init_led();
     initTime();
     init_uart_module();
+
+    /* TLF init */
+    TLF35584Demo_Init();
 
     Ifx_print("hello Tc297 \r\n");
     /* Wait for CPU sync event */
