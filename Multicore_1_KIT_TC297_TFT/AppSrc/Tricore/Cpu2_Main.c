@@ -33,6 +33,7 @@ extern IfxCpu_syncEvent g_cpuSyncEvent;
 
 int core2_main(void)
 {
+    int i = 0;
     IfxCpu_enableInterrupts();
 
     /* !!WATCHDOG2 IS DISABLED HERE!!
@@ -43,10 +44,19 @@ int core2_main(void)
     /* Wait for CPU sync event */
     IfxCpu_emitEvent(&g_cpuSyncEvent);
     IfxCpu_waitEvent(&g_cpuSyncEvent, 1);
-
+    i = 500000000;
+    while (i--)
+        ;
+    //init_rs232_0();
+    init_rs232_1();
     while (1)
     {
+        i = 500000000;
+        while (i--)
+            ;
         //led_109_blink();
+        //rs232_0_send();
+        rs232_1_send();
     }
     return (1);
 }

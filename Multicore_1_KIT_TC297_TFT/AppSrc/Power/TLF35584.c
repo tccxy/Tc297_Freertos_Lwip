@@ -1,6 +1,5 @@
 #include "pub.h"
 #include "TLF35584.h"
-#include "hQspi.h"
 
 /******************************************************************************/
 /* Defines                                                                    */
@@ -156,7 +155,7 @@ Tlf_Status Tlf_LockProtectedRegister(void)
 
     /* read and check Protection status */
     Tlf_ReadRegister(PROTSTAT, &SpiRxData);
-    Ifx_print("Tlf_LockProtectedRegister  %x.\r\n", SpiRxData);
+    //Ifx_print("Tlf_LockProtectedRegister  %x.\r\n", SpiRxData);
     if ((SpiRxData & 0x01) == 0x01)
     {
         Status = Tlf_Status_Ok; /* successful lock operation */
@@ -195,7 +194,7 @@ void TLF35584Demo_ConfigSysWdCfg(void)
 
 } /*End of TLF35584Demo_ConfigSysWdCfg0()*/
 
-void TLF35584Demo_Init(void)
+void TLF35584_Init(void)
 {
     initQSPI();
 
@@ -206,4 +205,4 @@ void TLF35584Demo_Init(void)
     Tlf_WriteRegister(DEVCTRL, 0xEA);
     Tlf_WriteRegister(DEVCTRLN, 0x15);
     Ifx_print("TLF35584_Init Down .\r\n");
-} /*End of TLF35584Demo_Init()*/
+} /*End of TLF35584_Init()*/

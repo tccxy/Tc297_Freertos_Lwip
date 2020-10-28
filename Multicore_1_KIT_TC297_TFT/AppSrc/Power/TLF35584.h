@@ -114,7 +114,7 @@ typedef enum
 /******************************************************************************/
 void TLF35584Demo_ConfigSysWdCfg(void);
 void TLF35584Demo_ErrorCallBack(Tlf_Status RetStatus);
-void TLF35584Demo_Init(void);
+void TLF35584_Init(void);
 void TLF35584Demo(void);
 
 

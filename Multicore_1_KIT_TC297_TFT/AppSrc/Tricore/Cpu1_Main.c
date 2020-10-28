@@ -31,8 +31,17 @@
 
 extern IfxCpu_syncEvent g_cpuSyncEvent;
 
+#define T_canr0 &MODULE_P20, 8
+#define T_cant0 &MODULE_P20, 7
+#define T_canr1 &MODULE_P00, 1
+#define T_cant1 &MODULE_P00, 0
+#define T_canr2 &MODULE_P15, 1
+#define T_cant2 &MODULE_P15, 0
+#define T_canr3 &MODULE_P20, 10
+#define T_cant3 &MODULE_P20, 9
 int core1_main(void)
 {
+    int i = 0;
     IfxCpu_enableInterrupts();
 
     /* !!WATCHDOG1 IS DISABLED HERE!!
@@ -43,10 +52,23 @@ int core1_main(void)
     /* Wait for CPU sync event */
     IfxCpu_emitEvent(&g_cpuSyncEvent);
     IfxCpu_waitEvent(&g_cpuSyncEvent, 1);
-
-    while (1)
+    i = 500000000;
+    while (i--)
+        ;
+    //multi_can_module_init();
+    //multi_can_node0_init();
+    //multi_can_node1_init();
+    //multi_can_node2_init();
+    //multi_can_node3_init();
+    multi_canr_module_init();
+    multi_can_node5_init();
+    while(1)
     {
-        //led_108_blink();
+        i = 500000000;
+        while (i--)
+            ;
+        multi_canr_send_msg(1);
+
     }
     return (1);
 }

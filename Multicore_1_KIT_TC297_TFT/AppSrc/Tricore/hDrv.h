@@ -1,29 +1,3 @@
-/**
- * \file Cpu0_Main.h
- * \brief System initialization and main program implementation.
- *
- * \version iLLD_Demos_1_0_0_0_0
- * \copyright Copyright (c) 2014 Infineon Technologies AG. All rights reserved.
- *
- *
- *                                 IMPORTANT NOTICE
- *
- *
- * Infineon Technologies AG (Infineon) is supplying this file for use
- * exclusively with Infineon's microcontroller products. This file can be freely
- * distributed within development tools that are supporting such microcontroller
- * products.
- *
- * THIS SOFTWARE IS PROVIDED "AS IS".  NO WARRANTIES, WHETHER EXPRESS, IMPLIED
- * OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
- * INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL,
- * OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
- *
- * \defgroup IfxLld_Demo_Eth_SrcDoc Source code documentation
- * \ingroup IfxLld_Demo_Eth
- */
-
 #ifndef _hDRV_H
 #define _hDRV_H
 
@@ -40,6 +14,8 @@
 #include "IfxPort.h"
 #include "IfxMultican_Can.h"
 #include "IfxMultican.h"
+#include "IfxQspi_SpiMaster.h"
+#include "IfxQspi_SpiSlave.h"
 #include "IfxAsclin_Asc.h"
 #include "Ifx_Shell.h"
 #include "Ifx_Console.h"
@@ -74,24 +50,61 @@ struct drv_asc_lin_uart
     IfxStdIf_DPipe asc_sandard_interface; /* Standard interface object            */
     IfxAsclin_Asc asclin;                 /* ASCLIN module object                 */
 };
-
+/*****eth*****/
 struct drv_eth
 {
     IfxEth eth;
 };
 
+/**********can*********/
+
+struct drv_multi_can_node
+{
+    IfxMultican_Can_Node can_node;                   /* CAN source node handle data structure                  */
+    IfxMultican_Can_NodeConfig can_node_config;      /* CAN node configuration structure                       */
+    IfxMultican_Can_MsgObj can_send_msgobj;          /* CAN source message object handle data structure        */
+    IfxMultican_Can_MsgObj can_rcv_msgobj;           /* CAN destination message object handle data structure   */
+    IfxMultican_Can_MsgObjConfig can_msg_obj_config; /* CAN message object configuration structure             */
+    IfxMultican_Message can_tx_msg;                  /* Transmitted CAN message structure                      */
+    IfxMultican_Message can_rx_msg;                  /* Received CAN message structure                         */
+};
+
+
 struct drv_multi_can
 {
-    IfxMultican_Can                 can;                   /* CAN module handle to HW module SFR set                 */
-    IfxMultican_Can_Config          can_config;             /* CAN module configuration structure                     */
-    IfxMultican_Can_Node            can_node;            /* CAN source node handle data structure                  */
-    IfxMultican_Can_NodeConfig      can_node_config;         /* CAN node configuration structure                       */
-    IfxMultican_Can_MsgObj          can_send_msgobj;          /* CAN source message object handle data structure        */
-    IfxMultican_Can_MsgObj          can_rcv_msgobj;          /* CAN destination message object handle data structure   */
-    IfxMultican_Can_MsgObjConfig    can_msg_obj_config;       /* CAN message object configuration structure             */
-    IfxMultican_Message             can_tx_msg;                 /* Transmitted CAN message structure                      */
-    IfxMultican_Message             can_rx_msg;                 /* Received CAN message structure                         */
+    IfxMultican_Can can;               /* CAN module handle to HW module SFR set                 */
+    IfxMultican_Can_Config can_config; /* CAN module configuration structure                     */
+    struct drv_multi_can_node multi_can_node[4];
 };
+
+struct drv_multi_canr
+{
+    IfxMultican_Can can;               /* CAN module handle to HW module SFR set                 */
+    IfxMultican_Can_Config can_config; /* CAN module configuration structure                     */
+    struct drv_multi_can_node multi_can_node[2];
+};
+
+/*******qspi*****/
+#define SPI_BUFFER_SIZE 5 /* Buffers size                  */
+
+typedef struct
+{
+    uint8 spiMasterTxBuffer[SPI_BUFFER_SIZE]; /* QSPI Master Transmit buffer   */
+    uint8 spiMasterRxBuffer[SPI_BUFFER_SIZE]; /* QSPI Master Receive buffer    */
+    uint8 spiSlaveTxBuffer[SPI_BUFFER_SIZE];  /* QSPI Slave Transmit buffer    */
+    uint8 spiSlaveRxBuffer[SPI_BUFFER_SIZE];  /* QSPI Slave Receive buffer     */
+} qspiBuffers;
+
+typedef struct
+{
+    qspiBuffers spiBuffers;                     /* Buffers instance              */
+    IfxQspi_SpiMaster spiMaster;                /* QSPI Master handle            */
+    IfxQspi_SpiMaster_Channel spiMasterChannel; /* QSPI Master Channel handle    */
+    IfxQspi_SpiSlave spiSlave;                  /* QSPI Slave handle             */
+} qspiComm;
+
+/*********************************************************************************************************************/
+/*------------------------------------------------Function Prototypes------------------------------------------------*/
 /******************************************************************************/
 /*------------------------------Global variables------------------------------*/
 /******************************************************************************/
@@ -118,6 +131,23 @@ void init_eth_module(uint8 *mac_addr);
 void set_eth_loop(void);
 void eth_demo_run(void);
 
-void init_multi_can_module(void);
-void multi_can_send_msg(void);
+void multi_can_module_init(void);
+void multi_can_node0_init(void);
+void multi_can_node1_init(void);
+void multi_can_node2_init(void);
+void multi_can_node3_init(void);
+void multi_canr_module_init(void);
+void multi_can_node4_init(void);
+void multi_can_node5_init(void);
+void multi_can_send_msg(int node_index);
+void multi_canr_send_msg(int node_index);
+
+void transferData(void);
+void initQSPI(void);
+
+void init_rs232_0(void);
+void rs232_0_send(void);
+void init_rs232_1(void);
+void rs232_1_send(void);
+
 #endif

@@ -1,4 +1,3 @@
-
 #include "hDrv.h"
 
 struct drv_eth g_drv_eth;
