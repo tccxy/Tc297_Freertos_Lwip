@@ -621,7 +621,8 @@ IFX_INLINE void IfxEth_clearTuInterrupt(IfxEth *eth);
  * \return None
  */
 IFX_INLINE void IfxEth_clearTxInterrupt(IfxEth *eth);
-
+IFX_INLINE void IfxEth_clearNisInterrupt(IfxEth *eth);
+IFX_INLINE unsigned int IfxEth_readAllEthStatus(IfxEth *eth);
 /** \brief Disables Timestamp Fine or Coarse Update
  * \param eth ETH driver structure
  * \return None
@@ -1311,6 +1312,12 @@ IFX_INLINE void IfxEth_clearTuInterrupt(IfxEth *eth)
     MODULE_ETH.STATUS.U = (uint32)((1 << IFX_ETH_STATUS_NIS_OFF) | (1 << IFX_ETH_STATUS_TU_OFF));
 }
 
+IFX_INLINE void IfxEth_clearNisInterrupt(IfxEth *eth)
+{
+    (void)eth;
+    MODULE_ETH.STATUS.U = (uint32)(1 << IFX_ETH_STATUS_NIS_OFF) ;
+}
+
 
 IFX_INLINE void IfxEth_clearTxInterrupt(IfxEth *eth)
 {
@@ -1554,6 +1561,11 @@ IFX_INLINE boolean IfxEth_isTxInterrupt(IfxEth *eth)
     return MODULE_ETH.STATUS.B.TI != 0;
 }
 
+
+IFX_INLINE unsigned int IfxEth_readAllEthStatus(IfxEth *eth)
+{
+    return MODULE_ETH.STATUS.U;
+}
 
 IFX_INLINE void IfxEth_readAllFlags(IfxEth *eth)
 {

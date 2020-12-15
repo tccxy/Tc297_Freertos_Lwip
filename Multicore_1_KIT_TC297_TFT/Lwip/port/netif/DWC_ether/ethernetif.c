@@ -66,9 +66,6 @@
 
 #define ETH_LWIP_PHY_MAX_RETRIES 0xfffffU
 
-#define IFX_LWIP_ZERO_COPY_TX (IFXETH_TX_BUFFER_BY_USER)
-#define IFX_LWIP_ZERO_COPY_RX (IFXETH_RX_BUFFER_BY_USER)
-
 struct ethernetif_tc2x g_ethernetif_tc2x;
 
 /**
@@ -83,7 +80,7 @@ static void low_level_init(struct netif *netif)
   IfxEth *eth = &g_drv_eth.eth;
   int i = 0;
   Ifx_print("low_level_init mac is \r\n");
-  netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP;
+  netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP | NETIF_FLAG_IGMP;
   for (i = 0; i < netif->hwaddr_len; i++)
   {
     Ifx_print("%02x ", netif->hwaddr[i]);
@@ -92,44 +89,6 @@ static void low_level_init(struct netif *netif)
 
   init_eth_module(netif->hwaddr);
 
-#if IFX_LWIP_ZERO_COPY_RX
-
-  for (i = 0; i < IFXETH_MAX_RX_BUFFERS; i++)
-  {
-    /* Pre-allocate a pbuf from the pool in order to support zero-copy receive.
-             * We need to allocate at the maximum size as we don't know the size of the
-             * yet to be received packet. */
-    struct pbuf *p = pbuf_alloc(PBUF_RAW, IFXETH_RTX_BUFFER_SIZE, PBUF_POOL);
-
-    if (p == NULL)
-    {
-      __debug();
-      LWIP_DEBUGF(NETIF_DEBUG | LWIP_DBG_TRACE,
-                  ("low_level_init: could not allocate RX pbuf (index=%d)\n", i));
-    }
-    else
-    {
-      /* pbufs allocated from the RAM pool should be non-chained. */
-      LWIP_ASSERT("low_level_init: pbuf is not contiguous (chained)", pbuf_clen(p) <= 1);
-
-      PBUF_DROP_PAD(p);
-
-      /* Assign into an RX descriptor item */
-      g_ethernetif_tc2x.rpbuf[i] = p;
-      IfxEth_RxDescr_setBuffer(IfxEth_getActualRxDescriptor(eth), p->payload);
-      IfxEth_freeReceiveBuffer(eth);
-      eth->rxCount++;
-    }
-  }
-
-  if (eth->pRxDescr != IfxEth_getBaseRxDescriptor(eth))
-  {
-    __debug();
-  }
-#endif
-#if IFX_LWIP_ZERO_COPY_TX
-  g_ethernetif_tc2x.tidx = 0;
-#endif
 #if LWIP_USE_HW_CHECKSUM_ENGINE
 
   IfxEth_setupChecksumEngine(eth, IfxEth_ChecksumMode_tcpUdpIcmpFull);
@@ -168,7 +127,6 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
   //initiate transfer();
   LWIP_DEBUGF(NETIF_DEBUG | LWIP_DBG_TRACE, ("low_level_output in \r\n"));
 
-#if !IFX_LWIP_ZERO_COPY_TX
   //if ((p->type == PBUF_REF) || (p->type == PBUF_ROM))
   {
 
@@ -188,84 +146,6 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
 
     IfxEth_sendTransmitBuffer(eth, l);
   }
-
-#else
-
-  LWIP_ASSERT("low_level_output: total length overflow the buffer\n", (p->tot_len < IFXETH_RTX_BUFFER_SIZE));
-
-  boolean dmaSafe = TRUE;
-
-  for (q = p; q != NULL; q = q->next)
-  {
-    //uint32 segment = (0xF0000000U & (uint32)q->payload);
-    //dmaSafe = dmaSafe && ((segment != 0xA0000000U) && (segment != 0x80000000U));
-    dmaSafe = dmaSafe && ((0x80000000U & (uint32)q->payload) == 0);
-
-    if (!dmaSafe)
-    {
-      break;
-    }
-  }
-
-  if (!dmaSafe)
-  {
-    u16_t l = 0;
-
-    g_ethernetif_tc2x.pbuf = p;
-    g_ethernetif_tc2x.chainedCount++;
-
-    IfxEth_TxDescr *descr = IfxEth_getActualTxDescriptor(eth);
-    while (IfxEth_TxDescr_isAvailable(descr) == FALSE)
-    {
-    }
-
-    /* Since DMA can't access the payload address, we have to copy
-         * into a special TX buffer */
-    u32_t tidx = g_ethernetif_tc2x.tidx;
-    u8_t *tbuf = (u8_t *)&(g_ethernetif_tc2x.tbuf[tidx][0]);
-    g_ethernetif_tc2x.tidx = (tidx + 1) % IFX_LWIP_ZERO_COPY_BUFFERS;
-
-    for (q = p; q != NULL; q = q->next)
-    {
-      memcpy(&tbuf[l], q->payload, q->len);
-      l = l + q->len;
-      LWIP_DEBUGF(NETIF_DEBUG | LWIP_DBG_TRACE, ("low_level_output: data=%#x, %d\n", q->payload, q->len));
-    }
-
-    IfxEth_TxDescr_setBuffer(IfxEth_getActualTxDescriptor(eth), tbuf);
-    IfxEth_sendTransmitBuffer(eth, l);
-  }
-  else
-  {
-    u8_t n = 0;
-    g_ethernetif_tc2x.zeroCopyCount++;
-
-    IfxEth_TxDescr *descr = IfxEth_getActualTxDescriptor(eth);
-
-    for (q = p; q != NULL; q = q->next)
-    {
-      while (IfxEth_TxDescr_isAvailable(descr) == FALSE)
-      {
-      }
-
-      IfxEth_TxDescr_setBuffer(descr, q->payload);
-      IfxEth_TxDescr_setup(descr, q->len, (n == 0), (q->next == NULL));
-      descr = &descr[1];
-      n++;
-    }
-
-    descr = IfxEth_getActualTxDescriptor(eth);
-
-    for (; n > 0; n--)
-    {
-      IfxEth_TxDescr_release(descr);
-      IfxEth_shuffleTxDescriptor(eth);
-    }
-
-    IfxEth_wakeupTransmitter(eth);
-  }
-
-#endif
 
   LWIP_DEBUGF(NETIF_DEBUG | LWIP_DBG_TRACE, ("low_level_output: signal length: %d\n", length));
 
@@ -302,7 +182,6 @@ static struct pbuf *low_level_input(struct netif *netif)
   }
   else
   {
-#if !IFX_LWIP_ZERO_COPY_RX
     len = len + (ETH_PAD_SIZE ? ETH_PAD_SIZE : 0); /* allow room for Ethernet padding */
 
     /* We allocate a pbuf chain of pbufs from the pool. */
@@ -339,49 +218,6 @@ static struct pbuf *low_level_input(struct netif *netif)
       LINK_STATS_INC(link.recv);
     }
 
-#else
-
-    /* Pre-allocate a pbuf from the pool in order to support zero-copy receive.
-         * We need to allocate at the maximum size as we don't know the size of the
-         * yet to be received packet. */
-    p = pbuf_alloc(PBUF_RAW, IFXETH_RTX_BUFFER_SIZE, PBUF_POOL);
-
-    if (p != NULL)
-    {
-      PBUF_DROP_PAD(p);
-
-      u32_t idx = IfxEth_getActualRxIndex(eth);
-
-      /* Get the actual pbuf containing received packet */
-      q = g_ethernetif_tc2x.rpbuf[idx];
-
-      /* Put the new pre-allocated pbuf into the slot for later reception */
-      g_ethernetif_tc2x.rpbuf[idx] = p;
-      IfxEth_RxDescr_setBuffer(IfxEth_getActualRxDescriptor(eth), p->payload);
-      IfxEth_freeReceiveBuffer(eth);
-      eth->rxCount++;
-
-      /* Now the p is set to pbuf containing received packet */
-      p = q;
-
-      /* modify the length information */
-      p->len = len;
-      p->tot_len = len;
-
-      PBUF_CLAIM_PAD(p);
-
-      if (IfxEth_isRxChecksumError(eth) != FALSE)
-      {
-        pbuf_free(q);
-        p = NULL;
-      }
-      else
-      {
-        LINK_STATS_INC(link.recv);
-      }
-    }
-
-#endif
     else
     {
       //TODO: drop packet();
@@ -516,9 +352,6 @@ err_t ethernetif_init(struct netif *netif)
   /* initialize the hardware */
   low_level_init(netif);
 
-  /* device capabilities */
-  netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP;
-
 #if LWIP_IPV6 && LWIP_IPV6_MLD
   /*
    * For hardware/netifs that implement MAC filtering.
@@ -541,11 +374,9 @@ err_t ethernetif_init(struct netif *netif)
   return ERR_OK;
 }
 
-SemaphoreHandle_t g_eth_swamphore = NULL;
-
 void ethernetif_recv(struct netif *netif)
 {
-  g_eth_swamphore = xSemaphoreCreateCounting(10, 0);
+
   if (NULL == g_eth_swamphore)
   {
     Ifx_print("g_eth_swamphore Failed...\r\n");
@@ -556,6 +387,11 @@ void ethernetif_recv(struct netif *netif)
     xSemaphoreTake(g_eth_swamphore, portMAX_DELAY);
     ethernetif_input(netif);
   }
+}
+
+void ethernetif_poll(struct netif *netif)
+{
+  ethernetif_input(netif);
 }
 
 #if 0

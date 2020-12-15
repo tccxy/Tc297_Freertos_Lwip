@@ -43,11 +43,11 @@
 #include "lwip_demo.h"
 
 IfxCpu_syncEvent g_cpuSyncEvent = 0;
-
-
+SemaphoreHandle_t g_eth_swamphore = NULL;
 
 int core0_main(void)
 {
+    int i = 0;
     IfxCpu_enableInterrupts();
 
     /* !!WATCHDOG0 AND SAFETY WATCHDOG ARE DISABLED HERE!!
@@ -61,6 +61,7 @@ int core0_main(void)
     init_led();
     initTime();
     init_uart_module();
+    init_uart_module1();
     /* TLF init */
     TLF35584_Init();
 
@@ -69,18 +70,29 @@ int core0_main(void)
     IfxCpu_emitEvent(&g_cpuSyncEvent);
     IfxCpu_waitEvent(&g_cpuSyncEvent, 1);
 
-    //xTaskCreate(test_eth, "test_eth", 1024, NULL, 3, NULL);
-    xTaskCreate(test_eth_socket_client, "test_eth_socket_client", 1024, NULL, 3, NULL);
-    //xTaskCreate(test_eth_socket_server, "test_eth_socket_server", 1024, NULL, 3, NULL);
+    g_eth_swamphore = xSemaphoreCreateCounting(10, 0);
+
+    //xTaskCreate(test_eth_fos, "test_eth_fos", 1024, NULL, 3, NULL);
+    xTaskCreate(test_eth_socket_client_fos, "test_eth_socket_client_fos", 1024, NULL, 3, NULL);
+    xTaskCreate(test_eth_socket_server_fos, "test_eth_socket_server_fos", 1024, NULL, 3, NULL);
 
     /*eth Must be at the highest level of the running task*/
-    xTaskCreate(eth_init, "eth_init", 1024, NULL, 5, NULL);
+    xTaskCreate(eth_init_fos, "eth_init_fos", 2028, NULL, 5, NULL);
+    //xTaskCreate(test_eth_socket_server_fos, "test_eth_socket_server_fos", 1024, NULL, 3, NULL);
 
+    /*eth Must be at the highest level of the running task*/
     // Start the scheduler
+        
     vTaskStartScheduler();
 
     // The following line should never be reached.
     while (1)
-        ;
+    {
+        i = 50000000;
+        while (i--)
+            ;
+        Ifx_print("cpu0 hello Tc297 \r\n");
+    }
+
     return (1);
 }

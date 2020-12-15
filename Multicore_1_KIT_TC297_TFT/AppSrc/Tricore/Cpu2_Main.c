@@ -48,7 +48,7 @@ int core2_main(void)
     while (i--)
         ;
     //init_rs232_0();
-    init_rs232_1();
+    //init_rs232_1();
     while (1)
     {
         i = 500000000;
@@ -56,7 +56,7 @@ int core2_main(void)
             ;
         //led_109_blink();
         //rs232_0_send();
-        rs232_1_send();
+        //rs232_1_send();
     }
     return (1);
 }

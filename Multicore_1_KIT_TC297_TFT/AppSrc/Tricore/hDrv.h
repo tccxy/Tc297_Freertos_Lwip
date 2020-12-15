@@ -111,10 +111,13 @@ typedef struct
 
 IFX_EXTERN struct drv_eth g_drv_eth;
 IFX_EXTERN struct drv_asc_lin_uart g_drv_asc_lin_uart;
+IFX_EXTERN struct drv_asc_lin_uart g_drv_asc_lin_uart1;
 //IFX_EXTERN SemaphoreHandle_t s_xSemaphore;
 
 void init_uart_module(void);
+void init_uart_module1(void);
 void Ifx_print(pchar format, ...);
+void Ifx_print1(pchar format, ...);
 
 void init_led(void);
 void led_107_on(void);

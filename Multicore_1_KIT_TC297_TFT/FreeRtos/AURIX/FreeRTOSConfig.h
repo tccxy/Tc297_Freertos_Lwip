@@ -89,12 +89,12 @@
 #define configCPU_CLOCK_HZ					( ( unsigned long ) 300000000UL )
 #define configTICK_RATE_HZ					( ( TickType_t ) 1000UL )
 #define configMAX_PRIORITIES				( ( TickType_t ) 6 )
-#define configMINIMAL_STACK_SIZE			( ( unsigned short ) 128 )
-#define configTOTAL_HEAP_SIZE				( ( size_t ) ( 32U * 1024U ) )
+#define configMINIMAL_STACK_SIZE			( ( unsigned short ) 256 )//( ( unsigned short ) 128 )
+#define configTOTAL_HEAP_SIZE				( ( size_t ) ( 64U * 1024U ) )//( ( size_t ) ( 32U * 1024U ) )
 #define configMAX_TASK_NAME_LEN				( 16 )
 #define configUSE_TRACE_FACILITY			0
 #define configUSE_16_BIT_TICKS				0
-#define configIDLE_SHOULD_YIELD				1
+#define configIDLE_SHOULD_YIELD				0
 #define configUSE_MALLOC_FAILED_HOOK 		0
 #define configCHECK_FOR_STACK_OVERFLOW		0
 #define configUSE_TICK_HOOK					0
@@ -107,7 +107,7 @@
 #define configMAX_CO_ROUTINE_PRIORITIES 	( 2 )
 
 /* Software timer configuration. */
-#define configUSE_TIMERS					0
+#define configUSE_TIMERS					1
 #define configTIMER_TASK_PRIORITY			( 3 )
 #define configTIMER_QUEUE_LENGTH			( 5 )
 #define configTIMER_TASK_STACK_DEPTH		configMINIMAL_STACK_SIZE

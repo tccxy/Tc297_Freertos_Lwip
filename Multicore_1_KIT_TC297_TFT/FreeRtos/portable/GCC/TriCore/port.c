@@ -93,7 +93,7 @@
 /* The stack pointer is accessible using portCSA_TO_ADDRESS( portCSA_TO_ADDRESS( pxCurrentTCB->pxTopOfStack )[ 0 ] )[ 2 ]; */
 #endif /* configCHECK_FOR_STACK_OVERFLOW */
 
-static IfxStm_Timer Timer[3];
+static volatile IfxStm_Timer Timer[3];
 static volatile Ifx_STM *const STM[3] = {&MODULE_STM0, &MODULE_STM1, &MODULE_STM2};
 
 volatile Ifx_SRC_SRCR *const GPSR[3] = {&SRC_GPSR_GPSR0_SR0, &SRC_GPSR_GPSR1_SR0, &SRC_GPSR_GPSR2_SR0};
@@ -273,57 +273,23 @@ BaseType_t xPortStartScheduler(void)
 
 static void prvSetupTimerInterrupt(void)
 {
-#if 1
-	IfxStm_Timer_Config timerConfig;
+    IfxStm_Timer_Config timerConfig;
 	IfxStm_Timer_initConfig(&timerConfig, STM[CPU_ID]);
-	timerConfig.base.frequency = configTICK_RATE_HZ;
 	timerConfig.base.isrPriority = configKERNEL_INTERRUPT_PRIORITY;
+	timerConfig.base.frequency = configTICK_RATE_HZ;
+
 	IfxStm_Timer_init(&Timer[CPU_ID], &timerConfig);
 	IfxStm_Timer_run(&Timer[CPU_ID]);
-#else
-
-	IfxStm_initCompareConfig(&g_STMConf); /* Initialize the configuration structure with default values   */
-
-	g_STMConf.triggerPriority = 2;			   /* Set the priority of the interrupt                            */
-	g_STMConf.typeOfService = IfxSrc_Tos_cpu0; /* Set the service provider for the interrupts                  */
-	g_STMConf.ticks = TIMER_INT_TIME;		   /* Set the number of ticks after which the timer triggers an
-                                                     * interrupt for the first time                                 */
-	IfxStm_initCompare(STM_USE, &g_STMConf);   /* Initialize the STM with the user configuration               */
-#endif
 }
 
-#if 1
-int i = 0;
 IFX_INTERRUPT(KERNEL_INTERRUPT, 0, configKERNEL_INTERRUPT_PRIORITY);
 
 void KERNEL_INTERRUPT(void)
 {
 	prvSystemTickHandler();
-	i++;
-	if (i % 500 == 0)
-	{
-		IfxPort_setPinState(LED3, IfxPort_State_toggled);
-	}
 }
-#else
-IFX_INTERRUPT(isrSTM, 0, 2);
-int i = 0;
-#define LED3 &MODULE_P13, 2 /* LED D109                             */
-void isrSTM(void)
-{
-	/* Update the compare register value that will trigger the next interrupt and toggle the LED */
 
-	//IfxPort_setPinState(LED, IfxPort_State_toggled);
 
-	IfxStm_increaseCompare(STM_USE, g_STMConf.comparator, TIMER_INT_TIME);
-	prvSystemTickHandler();
-	i++;
-	if (i % 500 == 0)
-	{
-		IfxPort_setPinState(LED3, IfxPort_State_toggled);
-	}
-}
-#endif
 //__attribute__((noinline))
 static void prvSystemTickHandler(void)
 {
@@ -361,7 +327,7 @@ static void prvSystemTickHandler(void)
 	}
 	portCLEAR_INTERRUPT_MASK_FROM_ISR(ulSavedInterruptMask);
 
-if (lYieldRequired != pdFALSE)
+	if (lYieldRequired != pdFALSE)
 #if configUSE_PREEMPTION == 1
 	{
 		/* Save the context of a task.

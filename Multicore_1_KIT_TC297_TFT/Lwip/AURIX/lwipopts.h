@@ -80,7 +80,7 @@ extern "C" {
 
 #define LWIP_PLATFORM_ASSERT(x) do {__debug();} while(0)
 
-
+#define LWIP_IGMP                   1
 
 
 #define LWIP_DBG_TYPES_ON               LWIP_DBG_ON

@@ -6,9 +6,10 @@
 #define INVALID_DATA_VALUE (uint32)0xDEADBEEF /* Used to invalidate RX message data content        */
 #define INVALID_ID_VALUE (uint32)0xFFFFFFFF   /* Used to invalidate RX message ID value            */
 
-#define SEND_MESSAGE_OBJECT_ID_0 (IfxMultican_MsgObjId)0 /* Source message object ID                          */
-#define RECV_MESSAGE_OBJECT_ID_0 (IfxMultican_MsgObjId)1 /* Destination message object ID                     */
-
+#define SEND_MESSAGE_OBJECT_ID_4 (IfxMultican_MsgObjId)8 /* Source message object ID                          */
+#define RECV_MESSAGE_OBJECT_ID_4 (IfxMultican_MsgObjId)9 /* Destination message object ID                     */
+#define SEND_MESSAGE_OBJECT_ID_5 (IfxMultican_MsgObjId)10 /* Source message object ID                          */
+#define RECV_MESSAGE_OBJECT_ID_5 (IfxMultican_MsgObjId)11 /* Destination message object ID                     */
 /**canr_1**/
 #define ISR_PRIORITY_CAN_TX_4 19                         /* Define the CAN TX interrupt priority              */
 #define ISR_PRIORITY_CAN_RX_4 18                         /* Define the CAN RX interrupt priority              */
@@ -87,7 +88,7 @@ void multi_can_node4_init(void)
     IfxMultican_Can_MsgObj_initConfig(&g_drv_multi_canr.multi_can_node[0].can_msg_obj_config,
                                       &g_drv_multi_canr.multi_can_node[0].can_node);
 
-    g_drv_multi_canr.multi_can_node[0].can_msg_obj_config.msgObjId = SEND_MESSAGE_OBJECT_ID_0;
+    g_drv_multi_canr.multi_can_node[0].can_msg_obj_config.msgObjId = SEND_MESSAGE_OBJECT_ID_4;
     g_drv_multi_canr.multi_can_node[0].can_msg_obj_config.messageId = CAN_MESSAGE_ID;
     g_drv_multi_canr.multi_can_node[0].can_msg_obj_config.frame = IfxMultican_Frame_transmit;
     g_drv_multi_canr.multi_can_node[0].can_msg_obj_config.txInterrupt.enabled = TRUE;
@@ -100,7 +101,7 @@ void multi_can_node4_init(void)
     IfxMultican_Can_MsgObj_initConfig(&g_drv_multi_canr.multi_can_node[0].can_msg_obj_config,
                                       &g_drv_multi_canr.multi_can_node[0].can_node);
 
-    g_drv_multi_canr.multi_can_node[0].can_msg_obj_config.msgObjId = RECV_MESSAGE_OBJECT_ID_0;
+    g_drv_multi_canr.multi_can_node[0].can_msg_obj_config.msgObjId = RECV_MESSAGE_OBJECT_ID_4;
     g_drv_multi_canr.multi_can_node[0].can_msg_obj_config.messageId = 0;
     g_drv_multi_canr.multi_can_node[0].can_msg_obj_config.frame = IfxMultican_Frame_receive;
     g_drv_multi_canr.multi_can_node[0].can_msg_obj_config.rxInterrupt.enabled = TRUE;
@@ -110,7 +111,7 @@ void multi_can_node4_init(void)
     g_drv_multi_canr.multi_can_node[0].can_msg_obj_config.control.matchingId = TRUE;
     IfxMultican_Can_MsgObj_init(&g_drv_multi_canr.multi_can_node[0].can_rcv_msgobj,
                                 &g_drv_multi_canr.multi_can_node[0].can_msg_obj_config);
-    Ifx_print("init_multi_can_node 4 done.\r\n");
+    Ifx_print1("init_multi_can_node 4 done.\r\n");
 }
 
 void multi_can_node5_init(void)
@@ -131,7 +132,7 @@ void multi_can_node5_init(void)
     IfxMultican_Can_MsgObj_initConfig(&g_drv_multi_canr.multi_can_node[1].can_msg_obj_config,
                                       &g_drv_multi_canr.multi_can_node[1].can_node);
 
-    g_drv_multi_canr.multi_can_node[1].can_msg_obj_config.msgObjId = SEND_MESSAGE_OBJECT_ID_0;
+    g_drv_multi_canr.multi_can_node[1].can_msg_obj_config.msgObjId = SEND_MESSAGE_OBJECT_ID_5;
     g_drv_multi_canr.multi_can_node[1].can_msg_obj_config.messageId = CAN_MESSAGE_ID;
     g_drv_multi_canr.multi_can_node[1].can_msg_obj_config.frame = IfxMultican_Frame_transmit;
     g_drv_multi_canr.multi_can_node[1].can_msg_obj_config.txInterrupt.enabled = TRUE;
@@ -144,7 +145,7 @@ void multi_can_node5_init(void)
     IfxMultican_Can_MsgObj_initConfig(&g_drv_multi_canr.multi_can_node[1].can_msg_obj_config,
                                       &g_drv_multi_canr.multi_can_node[1].can_node);
 
-    g_drv_multi_canr.multi_can_node[1].can_msg_obj_config.msgObjId = RECV_MESSAGE_OBJECT_ID_0;
+    g_drv_multi_canr.multi_can_node[1].can_msg_obj_config.msgObjId = RECV_MESSAGE_OBJECT_ID_5;
     g_drv_multi_canr.multi_can_node[1].can_msg_obj_config.messageId = 0;
     g_drv_multi_canr.multi_can_node[1].can_msg_obj_config.frame = IfxMultican_Frame_receive;
     g_drv_multi_canr.multi_can_node[1].can_msg_obj_config.rxInterrupt.enabled = TRUE;
@@ -154,7 +155,7 @@ void multi_can_node5_init(void)
     g_drv_multi_canr.multi_can_node[1].can_msg_obj_config.control.matchingId = TRUE;
     IfxMultican_Can_MsgObj_init(&g_drv_multi_canr.multi_can_node[1].can_rcv_msgobj,
                                 &g_drv_multi_canr.multi_can_node[1].can_msg_obj_config);
-    Ifx_print("init_multi_can_node 5 done.\r\n");
+    Ifx_print1("init_multi_can_node 5 done.\r\n");
 }
 
 void multi_canr_module_init()

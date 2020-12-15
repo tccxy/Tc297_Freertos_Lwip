@@ -2,7 +2,9 @@
 
 struct drv_eth g_drv_eth;
 #define HEADER_SIZE 14
+#define ISR_PRIORITY_ETH 6
 const uint8 myMacAddress[6] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55};
+
 
 void init_eth_module(uint8 *mac_addr)
 {
@@ -32,13 +34,17 @@ void init_eth_module(uint8 *mac_addr)
     eth_config.ethSfr = NULL_PTR;
     eth_config.rxDescr = &IfxEth_rxDescr;
     eth_config.txDescr = &IfxEth_txDescr;
-    eth_config.isrPriority = 3;
+    eth_config.isrPriority = ISR_PRIORITY_ETH;//lwip_freertos_demo use this
+    eth_config.isrProvider = IfxSrc_Tos_cpu0;//lwip_freertos_demo use this
+    //eth_config.isrProvider = IfxSrc_Tos_cpu1;//lwip_bare_demo use this
+    //eth_config.isrPriority = 4;//lwip_bare_demo use this
     memcpy(eth_config.macAddress, mac_addr, 6);
 
     IfxEth_init(&g_drv_eth.eth, &eth_config);
     wait(TimeConst_1s);
     wait(TimeConst_1s);
-    Ifx_print("link is %d \r\n", IfxEth_isLinkActive(&g_drv_eth.eth));
+    Ifx_print("link is %d \r\n", IfxEth_isLinkActive(&g_drv_eth.eth));//lwip_freertos_demo use this
+    //Ifx_print1("link is %d \r\n", IfxEth_isLinkActive(&g_drv_eth.eth));//lwip_bare_demo use this
 }
 
 void set_eth_loop(void)
@@ -51,7 +57,7 @@ void set_eth_loop(void)
 
     wait(TimeConst_1s);
     wait(TimeConst_1s);
-    Ifx_print("link is %d \r\n", IfxEth_isLinkActive(&g_drv_eth.eth));
+    //Ifx_print("link is %d \r\n", IfxEth_isLinkActive(&g_drv_eth.eth));
 }
 /** \brief Demo run API
  *

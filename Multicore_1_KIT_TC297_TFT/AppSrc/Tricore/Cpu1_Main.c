@@ -24,24 +24,80 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
  * IN THE SOFTWARE.
  *********************************************************************************************************************/
+#include "Pub.h"
 #include "Ifx_Types.h"
 #include "IfxCpu.h"
 #include "IfxScuWdt.h"
 #include "hDrv.h"
+#include "lwip_demo.h"
 
 extern IfxCpu_syncEvent g_cpuSyncEvent;
 
-#define T_canr0 &MODULE_P20, 8
-#define T_cant0 &MODULE_P20, 7
-#define T_canr1 &MODULE_P00, 1
-#define T_cant1 &MODULE_P00, 0
-#define T_canr2 &MODULE_P15, 1
-#define T_cant2 &MODULE_P15, 0
-#define T_canr3 &MODULE_P20, 10
-#define T_cant3 &MODULE_P20, 9
+static int itimes = 0;
+void test0_cpu1(void *pvParameters)
+{
+    while (1)
+    {
+        Ifx_print1("t0 %d \r\n", itimes++);
+        multi_can_send_msg(0);
+        vTaskDelay(20);
+    }
+}
+
+void test1_cpu1(void *pvParameters)
+{
+    while (1)
+    {
+        Ifx_print1("t1 %d \r\n", itimes++);
+        multi_can_send_msg(1);
+        vTaskDelay(20);
+    }
+}
+
+void test2_cpu1(void *pvParameters)
+{
+    while (1)
+    {
+        Ifx_print1("t2 %d \r\n", itimes++);
+        multi_can_send_msg(2);
+        vTaskDelay(20);
+    }
+}
+
+void test3_cpu1(void *pvParameters)
+{
+    while (1)
+    {
+        Ifx_print1("t3 %d \r\n", itimes++);
+        multi_can_send_msg(3);
+        vTaskDelay(20);
+    }
+}
+
+void test4_cpu1(void *pvParameters)
+{
+    while (1)
+    {
+        Ifx_print1("t4 %d\r\n", itimes++);
+        multi_canr_send_msg(0);
+        vTaskDelay(20);
+    }
+}
+
+void test5_cpu1(void *pvParameters)
+{
+    while (1)
+    {
+        Ifx_print1("t5 %d \r\n", itimes++);
+        multi_canr_send_msg(1);
+        vTaskDelay(20);
+    }
+}
+
 int core1_main(void)
 {
-    int i = 0;
+    int idelay = 0;
+    BaseType_t xReturn;
     IfxCpu_enableInterrupts();
 
     /* !!WATCHDOG1 IS DISABLED HERE!!
@@ -52,23 +108,42 @@ int core1_main(void)
     /* Wait for CPU sync event */
     IfxCpu_emitEvent(&g_cpuSyncEvent);
     IfxCpu_waitEvent(&g_cpuSyncEvent, 1);
-    i = 500000000;
-    while (i--)
+    idelay = 50000000;
+    while (idelay--)
         ;
-    //multi_can_module_init();
-    //multi_can_node0_init();
-    //multi_can_node1_init();
-    //multi_can_node2_init();
-    //multi_can_node3_init();
-    multi_canr_module_init();
-    multi_can_node5_init();
-    while(1)
-    {
-        i = 500000000;
-        while (i--)
-            ;
-        multi_canr_send_msg(1);
 
+    
+    #if 0
+    init_uart_module1();
+    multi_can_module_init();
+    multi_can_node0_init();
+    multi_can_node1_init();
+    multi_can_node2_init();
+    multi_can_node3_init();
+    multi_canr_module_init();
+    multi_can_node4_init();
+    multi_can_node5_init();
+    //test_eth_bare();
+    
+    xReturn=xTaskCreate(test0_cpu1, "test0_cpu1", 1024, NULL, 3, NULL);
+    Ifx_print1("xReturn test0_cpu1 %x \r\n", xReturn);
+    xReturn=xTaskCreate(test1_cpu1, "test1_cpu1", 1024, NULL, 3, NULL);
+    Ifx_print1("xReturn test1_cpu1 %x \r\n", xReturn);
+    xReturn=xTaskCreate(test2_cpu1, "test2_cpu1", 1024, NULL, 3, NULL);
+    Ifx_print1("xReturn test2_cpu1 %x \r\n", xReturn);
+    xReturn=xTaskCreate(test3_cpu1, "test3_cpu1", 1024, NULL, 3, NULL);
+    Ifx_print1("xReturn test3_cpu1 %x \r\n", xReturn);
+    xReturn=xTaskCreate(test4_cpu1, "test4_cpu1", 1024, NULL, 3, NULL);
+    Ifx_print1("xReturn test4_cpu1 %x \r\n", xReturn);
+    xReturn=xTaskCreate(test5_cpu1, "test5_cpu1", 1024, NULL, 3, NULL);
+    Ifx_print1("xReturn test5_cpu1 %x \r\n", xReturn);
+    #endif
+    
+
+    while (1)
+    {
+        //multi_can_send_msg(3);
+        //multi_canr_send_msg(0);
     }
     return (1);
 }
