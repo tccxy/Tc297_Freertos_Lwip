@@ -31,4 +31,20 @@
 #include "ip4_addr.h"
 
 extern SemaphoreHandle_t g_eth_swamphore;
+extern SemaphoreHandle_t g_can_restart_phore;
+
+extern struct drv_multi_can g_drv_multi_can;
+extern int itimes_can0_rcv;
+extern int itimes_can1_rcv;
+extern int itimes_can2_rcv;
+extern int itimes_can3_rcv;
+extern int itimes_can4_rcv;
+extern int itimes_can5_rcv;
+extern int restart_num;
+extern int stat_0;
+extern int stat_1;
+extern int stat_2;
+extern int stat_3;
+extern int stat_4;
+extern int stat_5;
 #endif

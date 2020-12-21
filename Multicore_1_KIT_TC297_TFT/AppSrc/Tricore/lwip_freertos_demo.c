@@ -178,7 +178,8 @@ void test_eth_fos(void *pvParameters)
     }
     udp_remove(udp);
 }
-
+int isend = 0;
+int ircv = 0;
 void test_eth_socket_client_fos(void *pvParameters)
 {
     int socket_descriptor = 0;
@@ -195,21 +196,22 @@ void test_eth_socket_client_fos(void *pvParameters)
     address.sin_family = AF_INET;
     //address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(7667);
-    Ifx_print1("test_eth_socket_client_fos init \r\n");
+    //Ifx_print1("test_eth_socket_client_fos init \r\n");
     socket_descriptor = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     multiCast.imr_multiaddr.s_addr = inet_addr("239.255.76.67");
     multiCast.imr_interface.s_addr = INADDR_ANY;
     setsockopt(socket_descriptor, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&multiCast, sizeof(multiCast));
-    Ifx_print1("test_eth_socket_client_fos down\r\n");
+    //Ifx_print1("test_eth_socket_client_fos down\r\n");
 
     for (;;)
     {
         //Ifx_print("send -- %d--msg \r\n", i++);
         i++;
+        isend++;
         sendto(socket_descriptor, data_test, sizeof(data_test), 0, (struct sockaddr *)&address, sizeof(address));
         if (i % 200 == 0)
         {
-            Ifx_print1("%x--*%d*%d*%d*%d*%d*%d*%d \r\n", eth_flag, i, irq_all, irq_rx, irq_tx, irq_tu, irq_eri, irq_nis);
+            //Ifx_print1("%x--*%d*%d*%d*%d*%d*%d*%d \r\n", eth_flag, i, irq_all, irq_rx, irq_tx, irq_tu, irq_eri, irq_nis);
         }
         vTaskDelay(10);
     }
@@ -249,8 +251,9 @@ void test_eth_socket_server_fos(void *pvParameters)
         //Ifx_print("recvdata start\r\n");
         err = recv(socket_descriptor, data_test, sizeof(data_test), 0);
         i++;
+        ircv++;
         if (i % 20 == 0)
-            Ifx_print("-%d- \r\n", i);
+            Ifx_print("-%d -**-%d \r\n", ircv,isend);
         //vTaskDelay(1000);
     }
 }

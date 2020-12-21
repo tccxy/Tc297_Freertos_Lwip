@@ -33,14 +33,13 @@
 
 extern IfxCpu_syncEvent g_cpuSyncEvent;
 
-static int itimes = 0;
 void test0_cpu1(void *pvParameters)
 {
     while (1)
     {
-        Ifx_print1("t0 %d \r\n", itimes++);
+        //Ifx_print1("t0 %d \r\n", itimes++);
         multi_can_send_msg(0);
-        vTaskDelay(20);
+        vTaskDelay(1);
     }
 }
 
@@ -48,9 +47,9 @@ void test1_cpu1(void *pvParameters)
 {
     while (1)
     {
-        Ifx_print1("t1 %d \r\n", itimes++);
+        //Ifx_print1("t1 %d \r\n", itimes++);
         multi_can_send_msg(1);
-        vTaskDelay(20);
+        vTaskDelay(1);
     }
 }
 
@@ -58,9 +57,9 @@ void test2_cpu1(void *pvParameters)
 {
     while (1)
     {
-        Ifx_print1("t2 %d \r\n", itimes++);
+        //Ifx_print1("t2 %d \r\n", itimes++);
         multi_can_send_msg(2);
-        vTaskDelay(20);
+        vTaskDelay(1);
     }
 }
 
@@ -68,9 +67,9 @@ void test3_cpu1(void *pvParameters)
 {
     while (1)
     {
-        Ifx_print1("t3 %d \r\n", itimes++);
+        //Ifx_print1("t3 %d \r\n", itimes++);
         multi_can_send_msg(3);
-        vTaskDelay(20);
+        vTaskDelay(1);
     }
 }
 
@@ -78,9 +77,9 @@ void test4_cpu1(void *pvParameters)
 {
     while (1)
     {
-        Ifx_print1("t4 %d\r\n", itimes++);
+        //Ifx_print1("t4 %d\r\n", itimes++);
         multi_canr_send_msg(0);
-        vTaskDelay(20);
+        vTaskDelay(1);
     }
 }
 
@@ -88,9 +87,69 @@ void test5_cpu1(void *pvParameters)
 {
     while (1)
     {
-        Ifx_print1("t5 %d \r\n", itimes++);
+        //Ifx_print1("t5 %d \r\n", itimes++);
         multi_canr_send_msg(1);
-        vTaskDelay(20);
+        vTaskDelay(1);
+    }
+}
+
+void test6_print(void *pvParameters)
+{
+    while (1)
+    {
+        //alert_3 = hwNode4->SR.U;
+        Ifx_print1("- -**- %d %d %d %d %d %d -**- -0x%x 0x%x 0x%x 0x%x\r\n",
+                   itimes_can0_rcv, itimes_can1_rcv, itimes_can2_rcv, itimes_can3_rcv, itimes_can4_rcv, itimes_can5_rcv,
+                   stat_0, stat_1, stat_2, stat_3);
+        vTaskDelay(1000);
+    }
+}
+
+SemaphoreHandle_t g_can_restart_phore = NULL;
+//when can error ,this task restart can node
+void multi_can_restart(void *pvParameters)
+{
+    g_can_restart_phore = xSemaphoreCreateCounting(2, 0);
+    for (;;)
+    {
+        //Ifx_print("multi_can_restart g_can_restart_phore\r\n");
+        xSemaphoreTake(g_can_restart_phore, portMAX_DELAY);
+        switch (restart_num)
+        {
+        case 0:
+        {
+            multi_can_node0_init();
+            break;
+        }
+        case 1:
+        {
+            multi_can_node1_init();
+            break;
+        }
+        case 2:
+        {
+            multi_can_node2_init();
+            break;
+        }
+        case 3:
+        {
+            multi_can_node3_init();
+            break;
+        }
+        case 4:
+        {
+            multi_can_node4_init();
+            break;
+        }
+        case 5:
+        {
+            multi_can_node5_init();
+            break;
+        }
+        default:
+            break;
+        }
+        vTaskDelay(1000);//must delay
     }
 }
 
@@ -112,8 +171,6 @@ int core1_main(void)
     while (idelay--)
         ;
 
-    
-    #if 0
     init_uart_module1();
     multi_can_module_init();
     multi_can_node0_init();
@@ -123,22 +180,25 @@ int core1_main(void)
     multi_canr_module_init();
     multi_can_node4_init();
     multi_can_node5_init();
+
     //test_eth_bare();
-    
-    xReturn=xTaskCreate(test0_cpu1, "test0_cpu1", 1024, NULL, 3, NULL);
+
+    xReturn = xTaskCreate(test0_cpu1, "test0_cpu1", 1024, NULL, 3, NULL);
     Ifx_print1("xReturn test0_cpu1 %x \r\n", xReturn);
-    xReturn=xTaskCreate(test1_cpu1, "test1_cpu1", 1024, NULL, 3, NULL);
+    xReturn = xTaskCreate(test1_cpu1, "test1_cpu1", 1024, NULL, 3, NULL);
     Ifx_print1("xReturn test1_cpu1 %x \r\n", xReturn);
-    xReturn=xTaskCreate(test2_cpu1, "test2_cpu1", 1024, NULL, 3, NULL);
+    xReturn = xTaskCreate(test2_cpu1, "test2_cpu1", 1024, NULL, 3, NULL);
     Ifx_print1("xReturn test2_cpu1 %x \r\n", xReturn);
-    xReturn=xTaskCreate(test3_cpu1, "test3_cpu1", 1024, NULL, 3, NULL);
+    xReturn = xTaskCreate(test3_cpu1, "test3_cpu1", 1024, NULL, 3, NULL);
     Ifx_print1("xReturn test3_cpu1 %x \r\n", xReturn);
-    xReturn=xTaskCreate(test4_cpu1, "test4_cpu1", 1024, NULL, 3, NULL);
+    xReturn = xTaskCreate(test4_cpu1, "test4_cpu1", 1024, NULL, 3, NULL);
     Ifx_print1("xReturn test4_cpu1 %x \r\n", xReturn);
-    xReturn=xTaskCreate(test5_cpu1, "test5_cpu1", 1024, NULL, 3, NULL);
+    xReturn = xTaskCreate(test5_cpu1, "test5_cpu1", 1024, NULL, 3, NULL);
     Ifx_print1("xReturn test5_cpu1 %x \r\n", xReturn);
-    #endif
-    
+    xReturn = xTaskCreate(test6_print, "test6_print", 1024, NULL, 3, NULL);
+    Ifx_print1("xReturn test6_print %x \r\n", xReturn);
+    xReturn = xTaskCreate(multi_can_restart, "multi_can_restart", 1024, NULL, 4, NULL);
+    Ifx_print1("xReturn multi_can_restart %x \r\n", xReturn);
 
     while (1)
     {
